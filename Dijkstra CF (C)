@@ -1,0 +1,67 @@
+import java.util.*;
+public class Main {
+    static class Pair {
+        int node;
+        long dist;
+        Pair(int node, long dist) {
+            this.node = node;
+            this.dist = dist;
+        }
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        int n = sc.nextInt(), m = sc.nextInt();
+        List<List<int[]>> adj = new ArrayList<>();
+        for (int i = 0; i <= n; i++) adj.add(new ArrayList<>());
+
+        for (int i = 0; i < m; i++) {
+            int a = sc.nextInt(), b = sc.nextInt(), w = sc.nextInt();
+            adj.get(a).add(new int[]{b, w});
+            adj.get(b).add(new int[]{a, w});
+        }
+
+        long[] dist = new long[n + 1];
+        Arrays.fill(dist, Long.MAX_VALUE);
+        int[] parent = new int[n + 1];
+        Arrays.fill(parent, -1);
+
+        PriorityQueue<Pair> pq = new PriorityQueue<>(Comparator.comparingLong(p -> p.dist));
+        dist[1] = 0;
+        pq.add(new Pair(1, 0));
+
+        while (!pq.isEmpty()) {
+            Pair cur = pq.poll();
+            int u = cur.node;
+            long d = cur.dist;
+
+            if (d != dist[u]) continue;
+
+            for (int[] edge : adj.get(u)) {
+                int v = edge[0], w = edge[1];
+                if (dist[v] > dist[u] + w) {
+                    dist[v] = dist[u] + w;
+                    parent[v] = u;
+                    pq.add(new Pair(v, dist[v]));
+                }
+            }
+        }
+
+        if (dist[n] == Long.MAX_VALUE) {
+            System.out.println(-1);
+            return;
+        }
+
+        
+        List<Integer> path = new ArrayList<>();
+        for (int v = n; v != -1; v = parent[v]) {
+            path.add(v);
+        }
+        Collections.reverse(path);
+
+        for (int v : path) {
+            System.out.print(v + " ");
+        }
+    }
+}
