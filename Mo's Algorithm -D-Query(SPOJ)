@@ -1,0 +1,153 @@
+import java.io.*;
+import java.util.*;
+
+public class Main {
+
+    static int[] arr;
+    static int[] freq;
+    static int distinct = 0;
+
+    static void add(int x) {
+        if (freq[x] == 0) {
+            distinct++;
+        }
+        freq[x]++;
+    }
+
+    static void remove(int x) {
+        freq[x]--;
+
+        if (freq[x] == 0) {
+            distinct--;
+        }
+    }
+
+    static class Query {
+        int l, r, idx;
+
+        Query(int l, int r, int idx) {
+            this.l = l;
+            this.r = r;
+            this.idx = idx;
+        }
+    }
+
+    static class FastScanner {
+        private final InputStream in = System.in;
+        private final byte[] buffer = new byte[1 << 16];
+        private int ptr = 0;
+        private int len = 0;
+
+        private int read() throws IOException {
+            if (ptr >= len) {
+                len = in.read(buffer);
+                ptr = 0;
+
+                if (len <= 0) {
+                    return -1;
+                }
+            }
+
+            return buffer[ptr++];
+        }
+
+        int nextInt() throws IOException {
+            int c;
+
+            do {
+                c = read();
+            } while (c <= ' ');
+
+            int num = 0;
+
+            while (c > ' ') {
+                num = num * 10 + (c - '0');
+                c = read();
+            }
+
+            return num;
+        }
+    }
+
+    public static void main(String[] args) throws Exception {
+
+        FastScanner sc = new FastScanner();
+
+        int n = sc.nextInt();
+
+        arr = new int[n];
+
+        for (int i = 0; i < n; i++) {
+            arr[i] = sc.nextInt();
+        }
+
+        int q = sc.nextInt();
+
+        Query[] queries = new Query[q];
+
+        for (int i = 0; i < q; i++) {
+            int l = sc.nextInt() - 1;
+            int r = sc.nextInt() - 1;
+
+            queries[i] = new Query(l, r, i);
+        }
+
+        int blockSize = (int) Math.sqrt(n);
+
+        // Your original sorting
+        Arrays.sort(queries, (a, b) -> {
+
+            int blockA = a.l / blockSize;
+            int blockB = b.l / blockSize;
+
+            if (blockA != blockB) {
+                return blockA - blockB;
+            }
+
+            return a.r - b.r;
+        });
+
+        freq = new int[1000001];
+
+        int[] ans = new int[q];
+
+        int curL = 0;
+        int curR = -1;
+
+        for (Query query : queries) {
+
+            int L = query.l;
+            int R = query.r;
+
+            while (curL > L) {
+                curL--;
+                add(arr[curL]);
+            }
+
+            while (curR < R) {
+                curR++;
+                add(arr[curR]);
+            }
+
+            while (curL < L) {
+                remove(arr[curL]);
+                curL++;
+            }
+
+            while (curR > R) {
+                remove(arr[curR]);
+                curR--;
+            }
+
+            ans[query.idx] = distinct;
+        }
+
+        StringBuilder sb = new StringBuilder();
+
+        for (int x : ans) {
+            sb.append(x).append('\n');
+        }
+
+        System.out.print(sb);
+    }
+}
